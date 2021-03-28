@@ -103,6 +103,8 @@ macro(bld_std_cxx_install_setting)
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${BLD_TARGET_PLATFORM}/${PROJECT_NAME}/${PROJECT_VERSION}${BLD_INSTALL_REV}/${BLD_COMPILER_ID}") 
 	install(EXPORT ${PROJECT_NAME} DESTINATION "lib/cmake/${PROJECT_NAME}")
 	install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME} DESTINATION "lib") 
+#Install custom CMake configuration file
+	install(FILES ${PROJECT_NAME}Config.cmake DESTINATION "lib/cmake/${PROJECT_NAME}") 	
 #pkgconfig	
 	set(BLD_PKG_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.pc.in" "${BLD_PKG_CONFIG_FILE}" @ONLY)
