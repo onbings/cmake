@@ -9,7 +9,7 @@
 # Author: 		Bernard HARMEL
 # Revision:		1.0
 # 
-# Remarks: 
+# Remarks: bha2
 # None
 # 
 # History:		05 June 2014: Initial version
@@ -24,9 +24,11 @@ macro(bld_cxx_init)
 	set (CMAKE_VERBOSE_MAKEFILE TRUE) 
 	set (CMAKE_COLOR_MAKEFILE  TRUE)
 
-	set (BLD_TARGET_PLATFORM "DESKTOP_LINUX64")
-	if ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "DESKTOP_WIN64"))
-		set (BLD_TARGET_PLATFORM "DESKTOP_WIN64")
+	if("${BLD_TARGET_PLATFORM}" STREQUAL "")
+		set (BLD_TARGET_PLATFORM "DESKTOP_LINUX64")
+		if ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "DESKTOP_WIN64"))
+			set (BLD_TARGET_PLATFORM "DESKTOP_WIN64")
+		endif()
 	endif()
 	
 	if ("${CMAKE_FIND_ROOT_PATH}" STREQUAL "")
@@ -35,7 +37,9 @@ macro(bld_cxx_init)
 #by default set it to the same loc	
 	set (CMAKE_INSTALL_PREFIX ${CMAKE_FIND_ROOT_PATH})
 	
-	set (BLD_COMPILER_ID "${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}")
+	if("${BLD_COMPILER_ID}" STREQUAL "")
+		set (BLD_COMPILER_ID "${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}")
+	endif()
 	set (CMAKE_DEBUG_POSTFIX "_d")
 	
 	if("${BLD_TARGET_PLATFORM}" STREQUAL "DESKTOP_WIN64")
@@ -97,16 +101,12 @@ macro(bld_std_cxx_install_setting)
 		set (BLD_INSTALL_REV .1)
 	endif()
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${BLD_TARGET_PLATFORM}/${PROJECT_NAME}/${PROJECT_VERSION}${BLD_INSTALL_REV}") 
-	#message(STATUS "Install Prefix   = " ${CMAKE_INSTALL_PREFIX})
-	install(EXPORT ${PROJECT_NAME} DESTINATION "${BLD_COMPILER_ID}/lib/cmake")
-	#install(FILES ${PROJECT_NAME}Config.cmake dependencies.cmake DESTINATION cmake) 
+	install(EXPORT ${PROJECT_NAME} DESTINATION "${BLD_COMPILER_ID}/lib/cmake/${PROJECT_NAME}")
 	install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME} DESTINATION "${BLD_COMPILER_ID}/lib") 
 #pkgconfig	
 	set(BLD_PKG_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
     configure_file("${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.pc.in" "${BLD_PKG_CONFIG_FILE}" @ONLY)
-	#message(STATUS "configure_file ${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}.pc.in  ${BLD_PKG_CONFIG_FILE}")
-    install(FILES "${BLD_PKG_CONFIG_FILE}" DESTINATION "${BLD_COMPILER_ID}/lib/cmake/pkgconfig")
-	#message(STATUS "install ${BLD_PKG_CONFIG_FILE} ${BLD_COMPILER_ID}/lib/cmake/pkgconfig")
+    install(FILES "${BLD_PKG_CONFIG_FILE}" DESTINATION "${BLD_COMPILER_ID}/lib/pkgconfig")
 endmacro()
 
 macro(bld_show_info)
