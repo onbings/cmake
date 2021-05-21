@@ -54,18 +54,15 @@ macro(bld_cxx_init)
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DNDEBUG -g")	#Add -g to debug release code
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DDEBUG")	 #add -fsanitize=leak to check for leak
 		set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DNDEBUG")			#Add -g to debug release code
-		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DDEBUG -g")	 #add -fsanitize=leak to check for leak	
+		set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DNDEBUG")			#Add -g to debug release code
+		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DDEBUG -g")	 #add -fsanitize=leak to check for leak
 	endif()
 endmacro()
 
-macro(bld_find_package BLD_PACKAGE_NAME BLD_PACKAGE_VERSION BLD_PACKAGE_REV)
-	message(STATUS "bld_find_package(" ${BLD_PACKAGE_NAME} "," ${BLD_PACKAGE_VERSION} "," ${BLD_PACKAGE_REV} ")")
+macro(bld_find_package BLD_PACKAGE_NAME BLD_PACKAGE_VERSION)
+	message(STATUS "bld_find_package(" ${BLD_PACKAGE_NAME} "," ${BLD_PACKAGE_VERSION} ")")
 	# Search in the repository 
-	#set(BLD_PACKAGE_NAME "GTest")
-	#set(BLD_PACKAGE_VERSION "1.8.0")
-	#set(BLD_PACKAGE_REV "5dadbab")
-	#set(${BLD_PACKAGE_NAME}_DIR "${CMAKE_FIND_ROOT_PATH}/${BLD_TARGET_PLATFORM}/${BLD_PACKAGE_NAME}/${BLD_PACKAGE_VERSION}.${BLD_PACKAGE_REV}/cmake")	
-	set(BLD_PACKAGE_NAME_SUFFIX "${BLD_TARGET_PLATFORM}/${BLD_PACKAGE_NAME}/${BLD_PACKAGE_VERSION}.${BLD_PACKAGE_REV}/${BLD_COMPILER_ID}/lib/cmake/${BLD_PACKAGE_NAME}")	
+	set(BLD_PACKAGE_NAME_SUFFIX "${BLD_TARGET_PLATFORM}/${BLD_PACKAGE_NAME}/${BLD_PACKAGE_VERSION}/${BLD_COMPILER_ID}/lib/cmake/${BLD_PACKAGE_NAME}")
 	set(${BLD_PACKAGE_NAME}_DIR "${CMAKE_FIND_ROOT_PATH}/${BLD_PACKAGE_NAME_SUFFIX}")	
 	message(STATUS "Look for " ${BLD_PACKAGE_NAME} " with suffix " ${BLD_PACKAGE_NAME_SUFFIX})
 	message(STATUS "${BLD_PACKAGE_NAME}_DIR is " ${${BLD_PACKAGE_NAME}_DIR})
