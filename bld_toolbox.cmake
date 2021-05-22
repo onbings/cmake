@@ -17,33 +17,36 @@ cmake_minimum_required(VERSION 3.0.2)
 
 #Unlike functions, macros run in the same scope as their caller. Therefore, all variables defined inside a macro are set in the caller’s scope.
 
-macro(bld_cxx_init TARGET_PLATFORM)
-	message(STATUS "bld_cxx_init ${BLD_TARGET_PLATFORM}")
-	set (CMAKE_CXX_STANDARD 14)
-	set (CMAKE_CONFIGURATION_TYPES "Debug;Release") 
-	set (CMAKE_VERBOSE_MAKEFILE TRUE) 
-	set (CMAKE_COLOR_MAKEFILE  TRUE)
-
-	if("${TARGET_PLATFORM}" STREQUAL "")
+macro(bld_cxx_init)
+	message(STATUS "bld_cxx_init [" ${BLD_TARGET_PLATFORM} "," ${CMAKE_FIND_ROOT_PATH} "]")
+	if("${BLD_TARGET_PLATFORM}" STREQUAL "")
 		set (BLD_TARGET_PLATFORM "DESKTOP_LINUX64")
 		if ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "DESKTOP_WIN64"))
 			set (BLD_TARGET_PLATFORM "DESKTOP_WIN64")
 		endif()
+		message(FATAL_ERROR "You must define BLD_TARGET_PLATFORM")
+#		message(WARNING "BLD_TARGET_PLATFORM was not specified -> Default to " ${BLD_TARGET_PLATFORM})
 	else()
-		set (BLD_TARGET_PLATFORM ${TARGET_PLATFORM})
+		message(STATUS "BLD_TARGET_PLATFORM is " ${BLD_TARGET_PLATFORM})
 	endif()
 
 	if ("${CMAKE_FIND_ROOT_PATH}" STREQUAL "")
 		message(FATAL_ERROR "You must define CMAKE_FIND_ROOT_PATH")
 	endif()
-#by default set it to the same loc	
+	#by default set it to the same loc
 	set (CMAKE_INSTALL_PREFIX ${CMAKE_FIND_ROOT_PATH})
-	
+
+	set (CMAKE_CXX_STANDARD 14)
+	set (CMAKE_CONFIGURATION_TYPES "Debug;Release") 
+	set (CMAKE_VERBOSE_MAKEFILE TRUE) 
+	set (CMAKE_COLOR_MAKEFILE  TRUE)
+	set (CMAKE_RELEASE_POSTFIX "_r")
+	set (CMAKE_DEBUG_POSTFIX "_d")
+
 	if("${BLD_COMPILER_ID}" STREQUAL "")
 		set (BLD_COMPILER_ID "${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}")
 	endif()
-	set (CMAKE_DEBUG_POSTFIX "_d")
-	
+
 	if("${BLD_TARGET_PLATFORM}" STREQUAL "DESKTOP_WIN64")
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /EHsc /bigobj")
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /EHsc /bigobj")
@@ -55,7 +58,6 @@ macro(bld_cxx_init TARGET_PLATFORM)
 		# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wextra -Wno-long-long -pedantic")
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DNDEBUG -g")	#Add -g to debug release code
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DDEBUG")	 #add -fsanitize=leak to check for leak
-		set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DNDEBUG")			#Add -g to debug release code
 		set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DNDEBUG")			#Add -g to debug release code
 		set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fPIC -Wall -Wconversion -Wextra -Wno-long-long -pedantic -DDEBUG -g")	 #add -fsanitize=leak to check for leak
 	endif()
@@ -76,10 +78,10 @@ macro(bld_cxx_init TARGET_PLATFORM)
 	endif ()
 endmacro()
 
-macro(bld_find_package BLD_PACKAGE_NAME BLD_PACKAGE_VERSION )
-	set (BLD_USE_LEGACY_REPO ${ARGN})
+macro(bld_find_package BLD_PACKAGE_NAME BLD_PACKAGE_VERSION BLD_USE_LEGACY_REPO)
+#	set (BLD_USE_LEGACY_REPO ${ARGN})
 	message(STATUS "bld_find_package(" ${BLD_PACKAGE_NAME} "," ${BLD_PACKAGE_VERSION} "," ${BLD_USE_LEGACY_REPO} ")")
-	if (BLD_USE_LEGACY_REPO)
+	if ("${BLD_USE_LEGACY_REPO}" STREQUAL "TRUE")
 		message(STATUS "Use old legacy repo layout to find ${BLD_PACKAGE_NAME}")
 		#Y:\repo\DESKTOP_DEBIAN\bofstd\2.1.0\cmake
 		set(BLD_PACKAGE_NAME_SUFFIX "${BLD_TARGET_PLATFORM}/${BLD_PACKAGE_NAME}/${BLD_PACKAGE_VERSION}/cmake")
@@ -96,7 +98,6 @@ macro(bld_find_package BLD_PACKAGE_NAME BLD_PACKAGE_VERSION )
 	find_package(${BLD_PACKAGE_NAME} REQUIRED PATH_SUFFIXES "${BLD_PACKAGE_NAME_DIR}")  
 	#set(CMAKE_FIND_DEBUG_MODE FALSE)
 	message(STATUS "${BLD_PACKAGE_NAME}_FOUND is " ${${BLD_PACKAGE_NAME}_FOUND})
-	message("=1=bof_INCLUDE_DIRS========>" ${bofstd_INCLUDE_DIRS})
 endmacro()
 
 macro(bld_std_cxx_compile_link_setting)
@@ -120,6 +121,7 @@ macro(bld_std_cxx_compile_link_setting)
 endmacro()
 
 macro(bld_std_cxx_install_setting)
+	message(STATUS "bld_std_cxx_install_setting")
 	if ("${BLD_INSTALL_REV}" STREQUAL "")
 		message("-- No BLD_INSTALL_REV -> default to 1")
 		set (BLD_INSTALL_REV .1)
@@ -163,6 +165,22 @@ macro(bld_show_info)
 	message(STATUS "Sys Root         = " ${CMAKE_SYSROOT})
 	message(STATUS "Install Prefix   = " ${CMAKE_INSTALL_PREFIX})
 	message(STATUS "Find Root Path   = " ${CMAKE_FIND_ROOT_PATH})
-	message(STATUS "USe legacy repo  = " ${BLD_USE_LEGACY_REPO})
+	message(STATUS "Use legacy repo  = " ${BLD_USE_LEGACY_REPO})
 endmacro()
 
+macro(bld_add_test BLD_TEST_PACKAGE_NAME BLD_TEST_PACKAGE_VERSION BLD_TEST_USE_LEGACY_REPO BLD_TEST_SUBDIR)
+	message(STATUS "bld_add_test(" ${BLD_TEST_PACKAGE_NAME} "," ${BLD_TEST_PACKAGE_VERSION} "," ${BLD_TEST_USE_LEGACY_REPO} "," ${BLD_TEST_SUBDIR} ")")
+	#message("====bld_add_test===> ${PROJECT_NAME}.gtest COMMAND $<TARGET_FILE_NAME:${PROJECT_NAME}> --gtest_output=xml:${CMAKE_BINARY_DIR}/GTestResult/$<CONFIG>/${PROJECT_NAME}.xml ${ARGV1} WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>" )
+
+	enable_testing()
+	add_test(NAME ${PROJECT_NAME}.gtest COMMAND $<TARGET_FILE_NAME:${PROJECT_NAME}> --gtest_output=xml:${CMAKE_BINARY_DIR}/GTestResult/$<CONFIG>/${PROJECT_NAME}.xml ${ARGV1} WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}> )
+	bld_find_package(${BLD_TEST_PACKAGE_NAME} ${BLD_TEST_PACKAGE_VERSION} ${BLD_TEST_USE_LEGACY_REPO})
+	add_subdirectory(${BLD_TEST_SUBDIR})
+endmacro()
+
+macro(bld_display_all_variable)
+	get_cmake_property(_variableNames VARIABLES)
+	foreach (_variableName ${_variableNames})
+		message(STATUS "${_variableName}=${${_variableName}}")
+	endforeach()
+endmacro()
